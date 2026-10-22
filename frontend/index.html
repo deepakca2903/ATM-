@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATM Account Management | Full-Stack & Agentic AI Simulator</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Top System Notice Banner -->
+    <aside class="disclaimer-banner" role="alert">
+        <div class="banner-inner">
+            <span class="warning-badge" aria-hidden="true">⚠️ EDUCATIONAL SIMULATOR ONLY</span>
+            <p><strong>Classroom Simulator:</strong> This is an educational lab project, not a real ATM, banking ledger, or payment system. Never use real money or customer credentials.</p>
+        </div>
+    </aside>
+
+    <!-- Main Navigation Bar -->
+    <header class="main-header">
+        <div class="header-brand">
+            <div class="atm-logo-icon">🏦</div>
+            <div>
+                <h1>ATM Account Management</h1>
+                <p class="subtitle">Full-Stack FastAPI & MySQL • Generative AI • Single & Multi-Agent Agentic AI</p>
+            </div>
+        </div>
+        <div class="system-status-pills">
+            <div class="status-pill" id="db-status-pill">
+                <span class="dot pulse-green"></span>
+                <span id="db-name-label">DB: Connecting...</span>
+            </div>
+            <div class="status-pill" id="ai-status-pill">
+                <span class="dot pulse-blue"></span>
+                <span id="ai-name-label">AI: Loading...</span>
+            </div>
+            <div class="status-pill active-acc-pill" id="active-acc-pill">
+                <span>Card: </span>
+                <strong id="active-acc-display">No Card Inserted</strong>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs" aria-label="Main Navigation">
+        <button class="nav-tab active" data-target="tab-kiosk">
+            <span class="tab-icon">🏧</span> ATM Kiosk Terminal
+        </button>
+        <button class="nav-tab" data-target="tab-management">
+            <span class="tab-icon">📋</span> Account Management
+        </button>
+        <button class="nav-tab" data-target="tab-single-agent">
+            <span class="tab-icon">🤖</span> AI Copilot (Single-Agent)
+        </button>
+        <button class="nav-tab" data-target="tab-multi-agent">
+            <span class="tab-icon">👥</span> Multi-Agent Risk & Advisory
+        </button>
+        <button class="nav-tab" data-target="tab-settings">
+            <span class="tab-icon">⚙️</span> Settings & Diagnostics
+        </button>
+    </nav>
+
+    <main class="main-content">
+        <!-- ========================================== -->
+        <!-- TAB 1: ATM KIOSK TERMINAL                  -->
+        <!-- ========================================== -->
+        <section id="tab-kiosk" class="tab-pane active">
+            <div class="kiosk-layout">
+                <!-- Physical ATM Terminal Wrapper -->
+                <div class="atm-physical-cabinet">
+                    <div class="cabinet-brand">
+                        <span>METRO BANK ATM SIMULATOR</span>
+                        <div class="camera-lens" title="Simulated Security Camera"></div>
+                    </div>
+
+                    <!-- Screen Frame -->
+                    <div class="atm-screen-frame">
+                        <div class="atm-screen" id="atm-screen">
+                            <!-- Screen State 1: Card Selection & Welcome -->
+                            <div class="screen-view active" id="screen-welcome">
+                                <div class="welcome-box">
+                                    <div class="atm-shield-icon">💳</div>
+                                    <h2>Welcome to ATM Simulator</h2>
+                                    <p>Please insert an ATM card or select an active account below to begin.</p>
+                                    
+                                    <div class="account-selector-box">
+                                        <label for="kiosk-account-select">Select Demo Account to Insert:</label>
+                                        <div class="select-row">
+                                            <select id="kiosk-account-select">
+                                                <option value="">Loading accounts...</option>
+                                            </select>
+                                            <button id="btn-insert-card" class="btn btn-primary">Insert Card 📥</button>
+                                        </div>
+                                    </div>
+                                    <p class="hint-text">Or create a new account in the <strong>Account Management</strong> tab.</p>
+                                </div>
+                            </div>
+
+                            <!-- Screen State 2: Enter PIN -->
+                            <div class="screen-view" id="screen-enter-pin">
+                                <h3>Security Authentication</h3>
+                                <p>Account: <strong id="pin-screen-acc">123456789</strong> (<span id="pin-screen-user">Dhanu</span>)</p>
+                                <p class="pin-prompt">Enter your 4-digit PIN using the keypad below:</p>
+                                <div class="pin-dots-display" id="pin-dots">
+                                    <span class="dot-slot"></span>
+                                    <span class="dot-slot"></span>
+                                    <span class="dot-slot"></span>
+                                    <span class="dot-slot"></span>
+                                </div>
+                                <div class="screen-actions">
+                                    <button class="btn btn-secondary" id="btn-cancel-pin">Cancel</button>
+                                    <button class="btn btn-primary" id="btn-submit-pin">Submit PIN</button>
+                                </div>
+                                <p class="error-text" id="pin-error-msg"></p>
+                            </div>
+
+                            <!-- Screen State 3: Main ATM Operations Menu -->
+                            <div class="screen-view" id="screen-menu">
+                                <div class="menu-header">
+                                    <div>
+                                        <span class="customer-welcome">Hello, <strong id="menu-customer-name">Customer</strong></span>
+                                        <span class="acc-meta" id="menu-acc-meta">Acc #123456789 (Savings)</span>
+                                    </div>
+                                    <button class="btn-eject" id="btn-eject-card" title="Eject Card">Eject Card ⏏</button>
+                                </div>
+                                <div class="atm-menu-grid">
+                                    <button class="atm-menu-btn" id="menu-btn-balance">
+                                        <span class="m-icon">💰</span>
+                                        <span class="m-title">Check Balance</span>
+                                        <span class="m-desc">View available funds</span>
+                                    </button>
+                                    <button class="atm-menu-btn" id="menu-btn-deposit">
+                                        <span class="m-icon">📥</span>
+                                        <span class="m-title">Deposit Money</span>
+                                        <span class="m-desc">Add cash to account</span>
+                                    </button>
+                                    <button class="atm-menu-btn" id="menu-btn-withdraw">
+                                        <span class="m-icon">🏧</span>
+                                        <span class="m-title">Withdraw Cash</span>
+                                        <span class="m-desc">Fast Cash / Custom</span>
+                                    </button>
+                                    <button class="atm-menu-btn" id="menu-btn-pin">
+                                        <span class="m-icon">🔑</span>
+                                        <span class="m-title">Change PIN</span>
+                                        <span class="m-desc">Update 4-digit security code</span>
+                                    </button>
+                                    <button class="atm-menu-btn" id="menu-btn-history">
+                                        <span class="m-icon">🧾</span>
+                                        <span class="m-title">Mini Statement</span>
+                                        <span class="m-desc">Last 5 transactions</span>
+                                    </button>
+                                    <button class="atm-menu-btn" id="menu-btn-close">
+                                        <span class="m-icon">🔒</span>
+                                        <span class="m-title">Close Account</span>
+                                        <span class="m-desc">Zero-balance closure</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Screen State 4: Check Balance Display -->
+                            <div class="screen-view" id="screen-balance">
+                                <h3>Account Balance Inquiry</h3>
+                                <div class="balance-card">
+                                    <span class="balance-label">Current Available Balance</span>
+                                    <div class="balance-amount" id="display-balance-val">₹0.00</div>
+                                    <div class="balance-details">
+                                        <p>Account Number: <strong id="display-balance-acc">123456789</strong></p>
+                                        <p>Account Type: <strong id="display-balance-type">Savings</strong></p>
+                                        <p>Holder: <strong id="display-balance-name">Customer</strong></p>
+                                    </div>
+                                </div>
+                                <div class="screen-footer-btns">
+                                    <button class="btn btn-secondary btn-back-menu">Back to Menu</button>
+                                    <button class="btn btn-primary" id="btn-print-balance-receipt">Print Receipt 🖨️</button>
+                                </div>
+                            </div>
+
+                            <!-- Screen State 5: Deposit View -->
+                            <div class="screen-view" id="screen-deposit">
+                                <h3>Deposit Cash</h3>
+                                <p>Insert deposit amount into the simulator:</p>
+                                <div class="form-group">
+                                    <div class="currency-input-wrapper">
+                                        <span class="currency-symbol">₹</span>
+                                        <input type="number" id="deposit-amount-input" min="1" step="50" placeholder="e.g. 5000">
+                                    </div>
+                                </div>
+                                <div class="quick-amount-tags">
+                                    <button type="button" class="btn-tag" data-val="500">+₹500</button>
+                                    <button type="button" class="btn-tag" data-val="2000">+₹2,000</button>
+                                    <button type="button" class="btn-tag" data-val="5000">+₹5,000</button>
+                                    <button type="button" class="btn-tag" data-val="10000">+₹10,000</button>
+                                </div>
+                                <div class="screen-footer-btns">
+                                    <button class="btn btn-secondary btn-back-menu">Cancel</button>
+                                    <button class="btn btn-success" id="btn-confirm-deposit">Confirm Deposit 📥</button>
+                                </div>
+                                <p class="error-text" id="deposit-error-msg"></p>
+                            </div>
+
+                            <!-- Screen State 6: Withdraw View -->
+                            <div class="screen-view" id="screen-withdraw">
+                                <h3>Cash Withdrawal</h3>
+                                <p>Select Fast Cash or enter custom amount:</p>
+                                <div class="fast-cash-grid">
+                                    <button class="btn-fast-cash" data-amount="500">₹500</button>
+                                    <button class="btn-fast-cash" data-amount="1000">₹1,000</button>
+                                    <button class="btn-fast-cash" data-amount="2000">₹2,000</button>
+                                    <button class="btn-fast-cash" data-amount="5000">₹5,000</button>
+                                    <button class="btn-fast-cash" data-amount="10000">₹10,000</button>
+                                    <button class="btn-fast-cash" data-amount="25000">₹25,000</button>
+                                </div>
+                                <div class="custom-amount-box">
+                                    <label for="withdraw-custom-input">Custom Amount (Multiples of ₹100):</label>
+                                    <div class="currency-input-wrapper">
+                                        <span class="currency-symbol">₹</span>
+                                        <input type="number" id="withdraw-custom-input" min="100" step="100" placeholder="e.g. 3500">
+                                    </div>
+                                </div>
+                                <div class="screen-footer-btns">
+                                    <button class="btn btn-secondary btn-back-menu">Cancel</button>
+                                    <button class="btn btn-primary" id="btn-confirm-withdraw">Dispense Cash 🏧</button>
+                                </div>
+                                <p class="error-text" id="withdraw-error-msg"></p>
+                            </div>
+
+                            <!-- Screen State 7: Cash Dispensed / Success -->
+                            <div class="screen-view" id="screen-dispense-success">
+                                <div class="success-box">
+                                    <div class="success-icon">💵</div>
+                                    <h3>Cash Dispensed Successfully!</h3>
+                                    <div class="dispensed-amount" id="dispensed-amount-val">₹0.00</div>
+                                    <div class="denominations-card">
+                                        <h4>Dispensed Note Breakdown:</h4>
+                                        <div id="denominations-list" class="denom-pills"></div>
+                                    </div>
+                                    <p>Remaining Balance: <strong id="dispense-rem-balance">₹0.00</strong></p>
+                                    <div class="screen-footer-btns">
+                                        <button class="btn btn-secondary btn-back-menu">Done</button>
+                                        <button class="btn btn-primary" id="btn-print-withdraw-receipt">Print Receipt 🖨️</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Screen State 8: Change PIN -->
+                            <div class="screen-view" id="screen-change-pin">
+                                <h3>Change ATM PIN</h3>
+                                <div class="form-change-pin">
+                                    <div class="form-group">
+                                        <label>Old 4-Digit PIN:</label>
+                                        <input type="password" id="pin-old-val" maxlength="4" placeholder="••••">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>New 4-Digit PIN:</label>
+                                        <input type="password" id="pin-new-val" maxlength="4" placeholder="••••">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Confirm New PIN:</label>
+                                        <input type="password" id="pin-confirm-val" maxlength="4" placeholder="••••">
+                                    </div>
+                                </div>
+                                <div class="screen-footer-btns">
+                                    <button class="btn btn-secondary btn-back-menu">Cancel</button>
+                                    <button class="btn btn-primary" id="btn-confirm-change-pin">Update PIN 🔑</button>
+                                </div>
+                                <p class="error-text" id="change-pin-error"></p>
+                            </div>
+
+                            <!-- Screen State 9: Mini Statement -->
+                            <div class="screen-view" id="screen-history">
+                                <h3>Mini Statement (Recent Transactions)</h3>
+                                <div class="history-table-wrapper">
+                                    <table class="history-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Type</th>
+                                                <th>Amount</th>
+                                                <th>Balance</th>
+                                                <th>Timestamp</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="kiosk-history-tbody">
+                                            <tr><td colspan="4">Loading history...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="screen-footer-btns">
+                                    <button class="btn btn-secondary btn-back-menu">Back to Menu</button>
+                                    <button class="btn btn-primary" id="btn-print-statement-receipt">Print Statement 🖨️</button>
+                                </div>
+                            </div>
+
+                            <!-- Screen State 10: Close Account In Kiosk -->
+                            <div class="screen-view" id="screen-close-account">
+                                <h3 class="danger-title">Close Account Confirmation</h3>
+                                <div class="alert-box-warning">
+                                    <strong>Policy Reminder:</strong> Accounts can ONLY be closed when balance is exactly <strong>₹0.00</strong>.
+                                </div>
+                                <p>Current Balance: <strong id="close-screen-bal">₹0.00</strong></p>
+                                <div class="form-group">
+                                    <label>Re-enter 4-digit PIN for Authorization:</label>
+                                    <input type="password" id="close-pin-input" maxlength="4" placeholder="••••">
+                                </div>
+                                <div class="form-group checkbox-row">
+                                    <input type="checkbox" id="close-confirm-chk">
+                                    <label for="close-confirm-chk">I confirm permanent closure of this educational simulator account.</label>
+                                </div>
+                                <div class="screen-footer-btns">
+                                    <button class="btn btn-secondary btn-back-menu">Cancel</button>
+                                    <button class="btn btn-danger" id="btn-confirm-close-account">Permanently Close Account 🔒</button>
+                                </div>
+                                <p class="error-text" id="close-error-msg"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Physical Peripherals (Card slot, Cash slot, Receipt printer, Keypad) -->
+                    <div class="atm-lower-peripherals">
+                        <div class="peripheral-slots">
+                            <!-- Card Slot -->
+                            <div class="p-slot-box">
+                                <label>CARD SLOT</label>
+                                <div class="slot-opening" id="card-slot-opening">
+                                    <div class="slot-light" id="card-slot-light"></div>
+                                </div>
+                                <span class="slot-subtext" id="card-slot-subtext">Insert Card</span>
+                            </div>
+
+                            <!-- Cash Dispenser Slot -->
+                            <div class="p-slot-box">
+                                <label>CASH DISPENSER</label>
+                                <div class="slot-opening cash-opening" id="cash-slot-opening">
+                                    <div class="slot-light" id="cash-slot-light"></div>
+                                </div>
+                                <span class="slot-subtext" id="cash-slot-subtext">Collect Cash Here</span>
+                            </div>
+
+                            <!-- Receipt Slot -->
+                            <div class="p-slot-box">
+                                <label>RECEIPT PRINTER</label>
+                                <div class="slot-opening receipt-opening" id="receipt-slot-opening">
+                                    <div class="slot-light"></div>
+                                </div>
+                                <span class="slot-subtext">Thermal Printer</span>
+                            </div>
+                        </div>
+
+                        <!-- Tactile Numeric Keypad -->
+                        <div class="keypad-container">
+                            <div class="keypad-grid">
+                                <button class="key-btn" data-key="1">1</button>
+                                <button class="key-btn" data-key="2">2</button>
+                                <button class="key-btn" data-key="3">3</button>
+                                <button class="key-btn action-key btn-cancel" data-key="CANCEL">CANCEL</button>
+
+                                <button class="key-btn" data-key="4">4</button>
+                                <button class="key-btn" data-key="5">5</button>
+                                <button class="key-btn" data-key="6">6</button>
+                                <button class="key-btn action-key btn-clear" data-key="CLEAR">CLEAR</button>
+
+                                <button class="key-btn" data-key="7">7</button>
+                                <button class="key-btn" data-key="8">8</button>
+                                <button class="key-btn" data-key="9">9</button>
+                                <button class="key-btn action-key btn-enter" data-key="ENTER">ENTER</button>
+
+                                <button class="key-btn disabled" disabled>.</button>
+                                <button class="key-btn" data-key="0">0</button>
+                                <button class="key-btn disabled" disabled>00</button>
+                                <button class="key-btn action-key btn-help" data-key="HELP">HELP</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side: Thermal Receipt Display Modal / Card -->
+                <aside class="kiosk-sidebar">
+                    <div class="receipt-paper" id="thermal-receipt">
+                        <div class="receipt-header">
+                            <h4>*** METRO BANK ATM ***</h4>
+                            <p>EDUCATIONAL SIMULATOR</p>
+                            <p class="receipt-sub">STATION #042 • OCT 2026</p>
+                            <hr class="receipt-divider">
+                        </div>
+                        <div class="receipt-body" id="receipt-body">
+                            <p>Insert your card and perform a transaction to print a simulated receipt.</p>
+                        </div>
+                        <div class="receipt-footer">
+                            <hr class="receipt-divider">
+                            <p>THANK YOU FOR BANKING WITH US</p>
+                            <p class="receipt-security-note">STRICTLY NON-MONETARY LAB PROJECT</p>
+                        </div>
+                    </div>
+
+                    <div class="quick-demo-accounts-card">
+                        <h4>Demo Account Switcher</h4>
+                        <p class="hint-text">Click any account to quickly insert into the ATM terminal:</p>
+                        <div id="quick-accounts-list" class="quick-accounts-list">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 2: ACCOUNT MANAGEMENT                  -->
+        <!-- ========================================== -->
+        <section id="tab-management" class="tab-pane">
+            <div class="management-grid">
+                <!-- Section A: Create Account -->
+                <div class="card form-card">
+                    <div class="card-header">
+                        <h3>Create New Account</h3>
+                        <span class="badge badge-accent">Scope Item 1</span>
+                    </div>
+                    <form id="form-create-account">
+                        <div class="form-group">
+                            <label for="create-acc-num">Account Number (Integer):</label>
+                            <input type="number" id="create-acc-num" required placeholder="e.g. 987654321">
+                        </div>
+                        <div class="form-group">
+                            <label for="create-acc-name">Customer Name:</label>
+                            <input type="text" id="create-acc-name" required placeholder="e.g. Aditi Sharma">
+                        </div>
+                        <div class="form-group">
+                            <label for="create-acc-type">Account Type:</label>
+                            <select id="create-acc-type">
+                                <option value="Savings">Savings Account</option>
+                                <option value="Current">Current Account</option>
+                                <option value="Checking">Checking Account</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="create-acc-pin">4-Digit Secret PIN:</label>
+                            <input type="password" id="create-acc-pin" maxlength="4" required placeholder="••••">
+                        </div>
+                        <div class="form-group">
+                            <label for="create-acc-bal">Opening Balance (₹):</label>
+                            <input type="number" id="create-acc-bal" min="0" step="100" value="0.00">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+                        <div id="create-account-feedback" class="feedback-msg"></div>
+                    </form>
+                </div>
+
+                <!-- Section B: Search & Directory -->
+                <div class="card directory-card">
+                    <div class="card-header">
+                        <div>
+                            <h3>Accounts Directory & Search</h3>
+                            <span class="badge badge-accent">Scope Item 6</span>
+                        </div>
+                        <div class="search-box">
+                            <input type="text" id="search-input" placeholder="Search by number, name, or type...">
+                            <button id="btn-search-trigger" class="btn btn-secondary">Search</button>
+                            <button id="btn-refresh-accounts" class="btn btn-secondary" title="Refresh">🔄</button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="data-table" id="accounts-table">
+                            <thead>
+                                <tr>
+                                    <th>Acc Number</th>
+                                    <th>Customer Name</th>
+                                    <th>Type</th>
+                                    <th>Balance</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="accounts-table-body">
+                                <tr><td colspan="5">Loading accounts...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 3: SINGLE-AGENT AI COPILOT             -->
+        <!-- ========================================== -->
+        <section id="tab-single-agent" class="tab-pane">
+            <div class="chat-agent-layout">
+                <!-- Chat Window -->
+                <div class="chat-card">
+                    <div class="card-header chat-header">
+                        <div class="agent-profile">
+                            <div class="agent-avatar">🤖</div>
+                            <div>
+                                <h3>ATM AI Copilot (Single-Agent)</h3>
+                                <p class="subtext">Autonomous ReAct Agent with Tool Calling & Financial Reasoning</p>
+                            </div>
+                        </div>
+                        <span class="badge badge-info" id="single-agent-mode-badge">Simulation Mode</span>
+                    </div>
+
+                    <div class="chat-messages" id="single-agent-messages">
+                        <div class="chat-bubble assistant-bubble">
+                            <div class="bubble-header">🤖 ATM Copilot</div>
+                            <div class="bubble-content">
+                                Hello! I am your <strong>ATM Intelligent Copilot</strong>. I have direct access to banking tools to check account balances, calculate withdrawal limits and cash note denominations, verify banking policies, and assist you with your transactions.
+                                <br><br>
+                                <em>How may I assist you today?</em>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Prompt Suggestions -->
+                    <div class="prompt-chips">
+                        <button class="chip-btn" data-prompt="Check if Account 123456789 can withdraw ₹15,000 and calculate the note breakdown.">Can I withdraw ₹15,000 from 123456789?</button>
+                        <button class="chip-btn" data-prompt="What is the policy for closing an account in this ATM simulator?">What is the account closure policy?</button>
+                        <button class="chip-btn" data-prompt="How are PINs secured and stored in the database?">How is my PIN secured?</button>
+                        <button class="chip-btn" data-prompt="Search for all registered accounts in the system.">Find all accounts</button>
+                    </div>
+
+                    <!-- Input Bar -->
+                    <form id="single-agent-form" class="chat-input-bar">
+                        <input type="text" id="single-agent-input" placeholder="Ask the ATM Copilot anything about your account, transactions, or policies..." required>
+                        <button type="submit" class="btn btn-primary" id="btn-send-agent">Send 🚀</button>
+                    </form>
+                </div>
+
+                <!-- Right Side: Tool Execution Inspection Panel -->
+                <aside class="agent-inspector-card">
+                    <h4>🛠️ Tool Execution Live Stream</h4>
+                    <p class="subtext">Real-time function calls executed by the single-agent ReAct loop:</p>
+                    <div id="tool-calls-stream" class="tool-calls-stream">
+                        <div class="empty-tool-state">No tool calls executed yet. Send a prompt to see tool invocations.</div>
+                    </div>
+                </aside>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 4: MULTI-AGENT RISK & ADVISORY         -->
+        <!-- ========================================== -->
+        <section id="tab-multi-agent" class="tab-pane">
+            <div class="multi-agent-layout">
+                <!-- Left: Scenario Trigger Form -->
+                <div class="card form-card">
+                    <div class="card-header">
+                        <h3>Multi-Agent Committee Review</h3>
+                        <span class="badge badge-accent">Collaborative Agentic AI</span>
+                    </div>
+                    <p class="hint-text">Trigger a multi-agent evaluation committee for high-value or sensitive transactions.</p>
+                    
+                    <form id="multi-agent-form">
+                        <div class="form-group">
+                            <label for="ma-account-select">Target Account:</label>
+                            <select id="ma-account-select">
+                                <option value="">Loading accounts...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="ma-action-type">Transaction Type:</label>
+                            <select id="ma-action-type">
+                                <option value="WITHDRAWAL">Large Cash Withdrawal</option>
+                                <option value="DEPOSIT">High-Value Deposit</option>
+                                <option value="ACCOUNT_CLOSURE">Account Closure Request</option>
+                                <option value="PIN_CHANGE">PIN Modification Request</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="ma-amount-input">Amount (₹):</label>
+                            <input type="number" id="ma-amount-input" value="35000" min="0" step="1000">
+                        </div>
+                        <div class="form-group">
+                            <label for="ma-scenario-input">Customer Context / Note:</label>
+                            <textarea id="ma-scenario-input" rows="3" placeholder="e.g. Urgent late-night medical emergency withdrawal at an unvisited terminal.">Urgent medical emergency withdrawal requested after normal banking hours.</textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block" id="btn-run-multi-agent">
+                            Convene Multi-Agent Committee 👥
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Right: Multi-Agent Committee Visualizer -->
+                <div class="committee-visualizer">
+                    <div class="agent-cards-row">
+                        <!-- Agent 1: Concierge -->
+                        <div class="agent-role-card concierge-card" id="card-agent-concierge">
+                            <div class="role-header">
+                                <span class="role-avatar">🛎️</span>
+                                <div>
+                                    <h4>Agent 1: Concierge</h4>
+                                    <span class="role-tag">Intent Parser & Orchestrator</span>
+                                </div>
+                            </div>
+                            <div class="role-body" id="concierge-content">
+                                <p class="waiting-text">Awaiting transaction proposal...</p>
+                            </div>
+                        </div>
+
+                        <!-- Agent 2: Security & Fraud Auditor -->
+                        <div class="agent-role-card security-card" id="card-agent-security">
+                            <div class="role-header">
+                                <span class="role-avatar">🛡️</span>
+                                <div>
+                                    <h4>Agent 2: Fraud Auditor</h4>
+                                    <span class="role-tag">Security Risk Assessment</span>
+                                </div>
+                            </div>
+                            <div class="role-body" id="security-content">
+                                <p class="waiting-text">Awaiting transaction proposal...</p>
+                            </div>
+                        </div>
+
+                        <!-- Agent 3: Financial Advisor -->
+                        <div class="agent-role-card financial-card" id="card-agent-financial">
+                            <div class="role-header">
+                                <span class="role-avatar">📈</span>
+                                <div>
+                                    <h4>Agent 3: Financial Advisor</h4>
+                                    <span class="role-tag">Liquidity & Advisory Specialist</span>
+                                </div>
+                            </div>
+                            <div class="role-body" id="financial-content">
+                                <p class="waiting-text">Awaiting transaction proposal...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Final Consensus Card -->
+                    <div class="consensus-card" id="consensus-card">
+                        <div class="consensus-header">
+                            <div class="consensus-title">
+                                <h3>Committee Consensus Verdict</h3>
+                                <span class="verdict-badge verdict-neutral" id="verdict-badge">PENDING</span>
+                            </div>
+                            <div class="risk-gauge-container">
+                                <span>Composite Risk: </span>
+                                <strong id="composite-risk-val">0%</strong>
+                            </div>
+                        </div>
+                        <div class="consensus-body" id="consensus-summary-text">
+                            Submit a scenario to generate a multi-agent decision matrix.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 5: SETTINGS & DIAGNOSTICS             -->
+        <!-- ========================================== -->
+        <section id="tab-settings" class="tab-pane">
+            <div class="settings-grid">
+                <!-- LLM Connection Configuration -->
+                <div class="card form-card">
+                    <div class="card-header">
+                        <h3>OpenAI-Compatible LLM Configuration</h3>
+                        <span class="badge badge-accent">AI Engine</span>
+                    </div>
+                    <p class="hint-text">
+                        Connect to Google Gemini (OpenAI compat), OpenAI, Groq, or local Ollama. If left blank, the app runs smoothly in <strong>Autonomous Simulation Mode</strong>.
+                    </p>
+                    <form id="form-llm-settings">
+                        <div class="form-group">
+                            <label for="cfg-base-url">Base URL:</label>
+                            <input type="text" id="cfg-base-url" placeholder="https://api.openai.com/v1">
+                            <small class="field-hint">For Gemini OpenAI compat: <code>https://generativelanguage.googleapis.com/v1beta/openai/</code></small>
+                        </div>
+                        <div class="form-group">
+                            <label for="cfg-model-name">Model Name:</label>
+                            <input type="text" id="cfg-model-name" placeholder="gpt-4o-mini or gemini-2.5-flash">
+                        </div>
+                        <div class="form-group">
+                            <label for="cfg-api-key">API Key:</label>
+                            <input type="password" id="cfg-api-key" placeholder="Enter API Key (stored in memory)">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save AI Configuration</button>
+                        <div id="llm-cfg-feedback" class="feedback-msg"></div>
+                    </form>
+                </div>
+
+                <!-- Database Diagnostics & Educational Rules -->
+                <div class="card diagnostics-card">
+                    <div class="card-header">
+                        <h3>System Diagnostics & Security Spec</h3>
+                        <span class="badge badge-accent">Classroom Spec</span>
+                    </div>
+                    <div class="spec-list">
+                        <div class="spec-item">
+                            <strong>Active Database Engine:</strong>
+                            <span id="diag-db-engine">Checking...</span>
+                        </div>
+                        <div class="spec-item">
+                            <strong>PIN Hashing Standard:</strong>
+                            <span>PBKDF2-HMAC-SHA256 (200,000 iterations, 16-byte hex salt)</span>
+                        </div>
+                        <div class="spec-item">
+                            <strong>Transaction Audit Ledger:</strong>
+                            <span>Enabled (Transactions table with timestamp & balance_after)</span>
+                        </div>
+                        <div class="spec-item">
+                            <strong>Zero-Balance Closure Rule:</strong>
+                            <span>Enforced (Account balance must equal ₹0.00 prior to deletion)</span>
+                        </div>
+                        <div class="spec-item">
+                            <strong>AI Agent Safety Barrier:</strong>
+                            <span>Strict prompt isolation, zero raw PIN retention in chat context</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="main-footer">
+        <p>ATM Account Management Educational Simulator • Practical Classroom Project • Updated October 2026</p>
+        <p class="footer-disclaimer">Strictly for academic instruction. No real monetary transactions or credentials are used.</p>
+    </footer>
+
+    <!-- Audio Effects for Realistic ATM Experience -->
+    <audio id="snd-beep" src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU..." preload="none"></audio>
+    
+    <script src="/static/app.js"></script>
+</body>
+</html>
